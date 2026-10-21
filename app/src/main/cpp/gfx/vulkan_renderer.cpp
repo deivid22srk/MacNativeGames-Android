@@ -3,6 +3,9 @@
 #include "gfx/embedded_shaders.h"
 
 #include <android/log.h>
+// Must be defined before vulkan.h to expose the Android WSI entry points
+// (VkAndroidSurfaceCreateInfoKHR / vkCreateAndroidSurfaceKHR).
+#define VK_USE_PLATFORM_ANDROID_KHR 1
 #include <vulkan/vulkan.h>
 
 #include <cstring>

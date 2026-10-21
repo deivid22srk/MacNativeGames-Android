@@ -15,7 +15,7 @@ data class ValidationReport(
 ) {
     fun toSanitizedLines(): List<String> = buildList {
         add("game: $gameFileName (${gameSizeBytes} bytes)")
-        add("container: ${container.label} valid=${container.valid}")
+        add("container: ${container.kind.label} valid=${container.valid}")
         container.notes.forEach { add("  - $it") }
         add("sha256: $gameSha256")
         if (keys != null) {
