@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MacNativeGames (Android)</string>
+    <string name="title_status">Port status: M0 (file validation) + M1 (Vulkan) — the game does not run yet</string>
+    <string name="pick_game">Choose game file (XCI / NSP)</string>
+    <string name="pick_keys">Choose prod.keys</string>
+    <string name="pick_fonts">Choose shared fonts folder / firmware NCA</string>
+    <string name="btn_validate">Validate locally</string>
+    <string name="btn_play">Open Vulkan test (M1)</string>
+    <string name="validation_log">Validation log</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícone simples (triângulo Vulkan) gerado localmente; sem assets de terceiros. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#1E2430"
+        android:pathData="M6,4 L42,4 A2,2 0 0 1 44,6 L44,42 A2,2 0 0 1 42,44 L6,44 A2,2 0 0 1 4,42 L4,6 A2,2 0 0 1 6,4 Z" />
+    <path
+        android:fillColor="#41C4A0"
+        android:pathData="M14,34 L24,14 L34,34 Z" />
+</vector>

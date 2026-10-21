@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MacNativeGames" parent="Theme.Material3.DayNight">
+        <item name="colorPrimary">@color/mng_primary</item>
+        <item name="colorSecondary">@color/mng_accent</item>
+    </style>
+</resources>
