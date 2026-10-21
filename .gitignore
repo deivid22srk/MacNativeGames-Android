@@ -1,0 +1,31 @@
+# Gradle
+.gradle/
+build/
+app/build/
+local.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Native build dirs
+.cxx/
+build-native/
+
+# Never commit user-provided or generated game data of any kind
+*.xci
+*.nsp
+*.nsz
+*.xcz
+*.nca
+prod.keys
+*.keys
+title.keys
+*.bfttf
+*.romfs
+*.ipa
+artifacts/
+
+# OS
+.DS_Store
