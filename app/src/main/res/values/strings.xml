@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MacNativeGames (Android)</string>
-    <string name="title_status">Port status: M0 (file validation) + M1 (Vulkan) — the game does not run yet</string>
+    <string name="title_status">Port status: M0 file validation, M1 Vulkan, M3–M5 probes — the game does not run yet</string>
     <string name="pick_game">Choose game file (XCI / NSP)</string>
     <string name="pick_keys">Choose prod.keys</string>
     <string name="pick_fonts">Choose shared fonts folder / firmware NCA</string>
     <string name="btn_validate">Validate locally</string>
     <string name="btn_play">Open Vulkan test (M1)</string>
+    <string name="btn_m3">NVN→Vulkan probe (M3)</string>
+    <string name="btn_m4">Audio + input probe (M4)</string>
+    <string name="btn_m5">Diagnostics (M5)</string>
+    <string name="btn_tone">Play 440 Hz tone (AAudio + mixer)</string>
+    <string name="btn_tone_stop">Stop tone</string>
+    <string name="touch_area_hint">Touch this area — coordinates go to the native input state. Gamepad buttons and the left stick also map here.</string>
     <string name="validation_log">Validation log</string>
 </resources>

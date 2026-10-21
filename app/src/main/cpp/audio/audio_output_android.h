@@ -1,18 +1,31 @@
-// AAudio output path — M4 scaffolding. Compiles on the NDK; there is no audio
-// device in CI, so this path is honest about being untested until a device run.
+// M4 — AAudio output with a mixer-driven callback.
+//
+// The stream always drains through the mixer path: the callback pulls N frames
+// from the active source (tone probe for M4 tests; the game's mixed output
+// later). Silence when no source is active — the stream proves the device
+// output works end to end with the 440 Hz probe tone.
 #pragma once
 
 #include <cstdint>
 
 namespace mng::audio {
 
-// Opens a stereo s16 48kHz AAudio stream in low-latency mode.
-// Returns an opaque handle or nullptr (device-only; CI never calls this).
-void* aaudio_open_output(int32_t sample_rate = 48000, int32_t channels = 2);
+// Opens the output stream (stereo s16). Returns 0 on success.
+int aaudio_open_output(int32_t sample_rate, int32_t channels);
 
-// Writes interleaved frames to the opened stream (blocking).
-bool aaudio_write(void* handle, const int16_t* frames, int32_t frame_count);
+// M4 probe: start/stop a sine tone routed through mix_stereo_s16.
+int aaudio_tone_start(double freq_hz);
+void aaudio_tone_stop();
 
-void aaudio_close(void* handle);
+// Diagnostics: current sample rate / frames per burst / underrun count.
+struct OutputStatus {
+    bool open = false;
+    int32_t sample_rate = 0;
+    int32_t frames_per_burst = 0;
+    int32_t xruns = 0;
+};
+OutputStatus aaudio_status();
+
+void aaudio_close_output();
 
 } // namespace mng::audio

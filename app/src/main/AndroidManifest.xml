@@ -26,5 +26,19 @@
             android:exported="false"
             android:screenOrientation="sensorLandscape"
             android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <activity
+            android:name=".NvnProbeActivity"
+            android:exported="false"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <activity
+            android:name=".AudioInputActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".DiagActivity"
+            android:exported="false" />
     </application>
 </manifest>

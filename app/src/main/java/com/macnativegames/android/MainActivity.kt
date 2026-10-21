@@ -48,6 +48,18 @@ class MainActivity : Activity() {
             text = getString(R.string.btn_play)
             setOnClickListener { startActivity(android.content.Intent(this@MainActivity, VulkanActivity::class.java)) }
         }
+        val m3Btn = Button(this).apply {
+            text = getString(R.string.btn_m3)
+            setOnClickListener { startActivity(android.content.Intent(this@MainActivity, NvnProbeActivity::class.java)) }
+        }
+        val m4Btn = Button(this).apply {
+            text = getString(R.string.btn_m4)
+            setOnClickListener { startActivity(android.content.Intent(this@MainActivity, AudioInputActivity::class.java)) }
+        }
+        val m5Btn = Button(this).apply {
+            text = getString(R.string.btn_m5)
+            setOnClickListener { startActivity(android.content.Intent(this@MainActivity, DiagActivity::class.java)) }
+        }
 
         val root = ScrollView(this).apply {
             setPadding(pad, pad, pad, pad)
@@ -58,6 +70,9 @@ class MainActivity : Activity() {
                 addView(keysBtn)
                 addView(validateBtn)
                 addView(playBtn)
+                addView(m3Btn)
+                addView(m4Btn)
+                addView(m5Btn)
                 addView(logText)
             })
         }

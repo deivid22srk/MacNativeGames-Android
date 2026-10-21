@@ -13,11 +13,17 @@ find_library(android-lib android)
 add_library(mng_android SHARED
         mng_jni.cpp
         gfx/vulkan_renderer.cpp
+        nvn/nvn_format_map.cpp
+        nvn/shader_cache.cpp
+        nvn/nvn_shim.cpp
+        nvn/nvn_entry_points.cpp
         runtime/nso_loader.cpp
         runtime/horizon_host.cpp
         audio/audio_mixer.cpp
         audio/audio_output_android.cpp
         video/video_player.cpp
+        input/input_manager.cpp
+        diag/diag.cpp
         platform/android/platform_memory.cpp
 )
 
