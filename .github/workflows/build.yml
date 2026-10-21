@@ -38,9 +38,12 @@ jobs:
 
       - name: Set up Android SDK (accept licenses)
         uses: android-actions/setup-android@v3
+        with:
+          # legacy 'tools' package no longer exists in the SDK repository
+          packages: platform-tools
 
-      - name: Install pinned NDK + CMake
-        run: sdkmanager --install "ndk;27.2.12479018" "cmake;3.22.1"
+      - name: Install pinned SDK packages, NDK + CMake
+        run: sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;27.2.12479018" "cmake;3.22.1"
 
       - name: Set up Gradle (with caching)
         uses: gradle/actions/setup-gradle@v4
