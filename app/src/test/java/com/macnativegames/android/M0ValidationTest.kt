@@ -117,12 +117,34 @@ class M0ValidationTest {
     @Test
     fun `validator produces sanitized report`() {
         val data = pfs0() + ByteArray(4096) { 0x42 }
+        val keysFixture = ProdKeysParser.REQUIRED.joinToString("\n") { name ->
+            "$name = 000102030405060708090a0b0c0d0e0f"
+        }
         val report = GameFileValidator.validate(
             ByteArrayInputStream(data), "synthetic.nsp", data.size.toLong(),
-            ByteArrayInputStream("master_key_00 = 000102030405060708090a0b0c0d0e0f".toByteArray())
+            ByteArrayInputStream(keysFixture.toByteArray())
         )
         val lines = report.toSanitizedLines()
         assertTrue(lines.any { it.contains("PASS") })
         assertTrue(lines.any { it.startsWith("sha256:") })
+    }
+
+    @Test
+    fun `validator reports PARTIAL when required keys are missing`() {
+        val data = pfs0() + ByteArray(1024) { 0x42 }
+        val report = GameFileValidator.validate(
+            ByteArrayInputStream(data), "synthetic.nsp", data.size.toLong(),
+            ByteArrayInputStream("master_key_00 = 000102030405060708090a0b0c0d0e0f".toByteArray())
+        )
+        assertTrue(report.toSanitizedLines().any { it.contains("PARTIAL") })
+    }
+
+    @Test
+    fun `validator reports FAIL for invalid container`() {
+        val data = "JUNK".toByteArray() + ByteArray(128)
+        val report = GameFileValidator.validate(
+            ByteArrayInputStream(data), "synthetic.bin", data.size.toLong(), null
+        )
+        assertTrue(report.toSanitizedLines().any { it.contains("FAIL") })
     }
 }
