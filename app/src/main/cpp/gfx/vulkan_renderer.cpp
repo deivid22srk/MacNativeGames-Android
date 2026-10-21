@@ -411,10 +411,14 @@ int VulkanRenderer::render_frame() {
     uint32_t image_index = 0;
     VkResult rc = vkAcquireNextImageKHR(impl_->device, impl_->swapchain, UINT64_MAX,
                                         impl_->sem_image, VK_NULL_HANDLE, &image_index);
-    if (rc == VK_ERROR_OUT_OF_DATE_KHR) {
+    if (rc == VK_ERROR_OUT_OF_DATE_KHR || rc == VK_ERROR_SURFACE_LOST_KHR) {
         resize(impl_->width, impl_->height);
         return static_cast<int>(impl_->frames);
     }
+    if (rc != VK_SUCCESS && rc != VK_SUBOPTIMAL_KHR) {
+        return static_cast<int>(impl_->frames); // e.g. timeout; retry next frame
+    }
+    const bool suboptimal = (rc == VK_SUBOPTIMAL_KHR);
 
     VkCommandBuffer cmd = impl_->cmd_buffers[image_index];
     vkWaitForFences(impl_->device, 1, &impl_->fence, VK_TRUE, UINT64_MAX);
@@ -466,7 +470,10 @@ int VulkanRenderer::render_frame() {
     pi.swapchainCount = 1;
     pi.pSwapchains = &impl_->swapchain;
     pi.pImageIndices = &image_index;
-    vkQueuePresentKHR(impl_->queue, &pi);
+    const VkResult prc = vkQueuePresentKHR(impl_->queue, &pi);
+    if (prc == VK_ERROR_OUT_OF_DATE_KHR || prc == VK_SUBOPTIMAL_KHR || suboptimal) {
+        resize(impl_->width, impl_->height);
+    }
 
     return static_cast<int>(++impl_->frames);
 }
@@ -482,9 +489,22 @@ int VulkanRenderer::resize(uint32_t width, uint32_t height) {
     (void)height;
     if (!create_swapchain() || !create_render_pass()) return 1;
 
-    VkViewport viewport{0.0f, 0.0f, static_cast<float>(impl_->width),
-                        static_cast<float>(impl_->height), 0.0f, 1.0f};
-    (void)viewport;
+    // Swapchain image count may differ after recreation; command buffers are
+    // indexed by image index, so reallocate to match the new count.
+    if (impl_->cmd_buffers.size() != impl_->framebuffers.size()) {
+        impl_->cmd_buffers.clear();
+        VkCommandBufferAllocateInfo aci{};
+        aci.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        aci.commandPool = impl_->cmd_pool;
+        aci.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        aci.commandBufferCount = static_cast<uint32_t>(impl_->framebuffers.size());
+        impl_->cmd_buffers.resize(impl_->framebuffers.size());
+        if (vkAllocateCommandBuffers(impl_->device, &aci, impl_->cmd_buffers.data()) !=
+            VK_SUCCESS) {
+            return 2;
+        }
+    }
+
     LOGI("swapchain resized to %ux%u", impl_->width, impl_->height);
     return 0;
 }

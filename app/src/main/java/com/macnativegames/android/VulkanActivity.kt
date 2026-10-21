@@ -6,17 +6,24 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.FrameLayout
 import android.widget.TextView
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * M1 — proves the graphics stack: a Vulkan instance, device, swapchain bound to this
- * Activity's SurfaceView and a render loop drawing the M1 test triangle.
+ * Activity's SurfaceView and a render loop drawing the M1 test triangle (small
+ * centered RGB-gradient triangle on a dark background).
  * This is NOT game rendering; it is the M1 acceptance probe.
+ *
+ * Concurrency contract: ALL native Vulkan calls happen on the single render
+ * thread. surfaceChanged only raises a flag the render loop consumes — calling
+ * native resize from the UI thread raced with in-flight submits.
  */
 class VulkanActivity : Activity(), SurfaceHolder.Callback2 {
 
     private var surfaceReady = false
     private var renderThread: Thread? = null
     private lateinit var fpsText: TextView
+    private val resizeRequested = AtomicBoolean(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,9 +45,15 @@ class VulkanActivity : Activity(), SurfaceHolder.Callback2 {
                 runOnUiThread { fpsText.text = "Vulkan init failed (rc=$rc)" }
                 return@Thread
             }
+            runOnUiThread {
+                fpsText.text = "M1 Vulkan triangle — initializing"
+            }
             var last = System.nanoTime()
             var frames = 0
             while (surfaceReady && !Thread.currentThread().isInterrupted) {
+                if (resizeRequested.compareAndSet(true, false)) {
+                    NativeBridge.vulkanResize(0, 0) // native re-queries surface caps
+                }
                 val n = NativeBridge.vulkanRenderFrame()
                 frames++
                 val now = System.nanoTime()
@@ -56,7 +69,8 @@ class VulkanActivity : Activity(), SurfaceHolder.Callback2 {
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        if (surfaceReady) NativeBridge.vulkanResize(width, height)
+        // Consume on the render thread; never touch Vulkan from the UI thread.
+        if (surfaceReady) resizeRequested.set(true)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {

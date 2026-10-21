@@ -29,3 +29,4 @@ artifacts/
 
 # OS
 .DS_Store
+local.properties

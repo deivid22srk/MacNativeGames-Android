@@ -85,22 +85,48 @@ class MainActivity : Activity() {
         }
     }
 
+    // Validation streams SHA-256 over potentially multi-GB files: it MUST run
+    // off the UI thread or Android kills the app with an ANR (signal 3).
+    private val validating = java.util.concurrent.atomic.AtomicBoolean(false)
+
     private fun validateLocal() {
         val g = gameUri
         if (g == null) { log("ERROR: pick a game file first"); return }
-        try {
-            contentResolver.openInputStream(g)?.use { input ->
-                val size = (contentResolver.openFileDescriptor(g, "r")?.use { it.statSize }) ?: -1L
-                val keysStream = keysUri?.let { k -> contentResolver.openInputStream(k) }
-                val report = input.use { i ->
-                    val name = g.lastPathSegment ?: "game"
-                    GameFileValidator.validate(i, name, size, keysStream)
-                }
-                report.toSanitizedLines().forEach { log(it) }
-            } ?: log("ERROR: cannot open the selected game file")
-        } catch (t: Throwable) {
-            log("ERROR: ${t.message}")
+        if (!validating.compareAndSet(false, true)) {
+            log("validation already running — wait for it to finish"); return
         }
+        val k = keysUri
+        log("validation started (background thread) — UI stays responsive")
+        Thread {
+            var report: ValidationReport? = null
+            var failure: String? = null
+            try {
+                val size = contentResolver.openFileDescriptor(g, "r")?.use { it.statSize } ?: -1L
+                val name = g.lastPathSegment ?: "game"
+                contentResolver.openInputStream(g)?.use { input ->
+                    val keysStream = k?.let { kk -> contentResolver.openInputStream(kk) }
+                    keysStream?.use { keys ->
+                        report = GameFileValidator.validate(input, name, size, keys)
+                    } ?: run { report = GameFileValidator.validate(input, name, size, null) }
+                } ?: run { failure = "cannot open the selected game file" }
+            } catch (t: Throwable) {
+                failure = t.message ?: t.javaClass.simpleName
+            } finally {
+                validating.set(false)
+            }
+            val finishedReport = report
+            val finishedFailure = failure
+            runOnUiThread {
+                when {
+                    finishedFailure != null -> log("ERROR: $finishedFailure")
+                    finishedReport != null -> finishedReport.toSanitizedLines().forEach { line ->
+                        log(line)
+                    }
+                    else -> log("ERROR: cannot open the selected game file")
+                }
+                log("validation finished — UI thread was never blocked")
+            }
+        }.start()
     }
 
     private fun log(line: String) {
